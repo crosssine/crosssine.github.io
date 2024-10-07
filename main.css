@@ -29,16 +29,15 @@
   line-height: 42px;
   padding: 0;
   border: none;
-  background: rgb(255, 27, 0);
-  background: linear-gradient(0deg, rgba(255, 27, 0, 1) 0%, rgba(251, 75, 2, 1) 100%);
+  background: rgb(50, 50, 50); /* Black color */
+  background: linear-gradient(0deg, rgba(50, 50, 50, 1) 0%, rgba(100, 100, 100, 1) 100%); /* Black gradient */
 }
 
 .btn-1:hover {
-  color: #f0094a;
+  color: #ffffff; /* Red hover text color */
   background: transparent;
   box-shadow: none;
 }
-
 .btn-1:before,
 .btn-1:after {
   content: '';
@@ -47,7 +46,7 @@
   right: 0;
   height: 2px;
   width: 0;
-  background: #f0094a;
+  background: #333333;
   box-shadow:
     -1px -1px 5px 0px #fff,
     7px 7px 20px 0px #0003,

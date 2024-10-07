@@ -1,0 +1,24 @@
+body {
+    /* margin: 50% 0px; */
+    background: #0e0e0e;
+    /* height: 100%; */
+}
+img {
+    display: block;
+    /* -webkit-user-select: none; */
+    margin: auto;
+    cursor: zoom-in;
+    background-color: hsl(0, 0%, 90%);
+}
+.content {
+    display: grid;
+    grid-template-columns: 420px 420px;
+}
+
+img {
+    cursor: pointer;
+}
+
+/* html {
+    height: 100%;
+} */
