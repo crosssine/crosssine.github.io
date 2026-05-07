@@ -1,78 +1,120 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-  <title>CrossSine</title>
-  <link rel="stylesheet" href="main.css">
-  <link rel="icon" href="CrossSine.png" type="image/x-icon">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Full Screen Background Image</title>
-    <style>
-       #blackScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: black;
-            z-index: 9999;
-            opacity: 1;
-            transition: opacity 5s ease;
-        }
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            background-image: url('background.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CrossSine – Home</title>
+  <link rel="icon" href="file/C.png" type="image/x-icon">
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-  <div id="blackScreen"></div>
 
-    <script>
-        window.addEventListener('load', function() {
-            document.getElementById('blackScreen').style.opacity = '0';
-            
-            setTimeout(function() {
-                document.getElementById('blackScreen').remove();
-            }, 5000);
-        });
-    </script>
-  <script src="Script.js"></script>
+  <header>
+    <span class="logo">CrossSine</span>
+    <nav>
+      <a href="index.html" class="active">Home</a>
+      <a href="downloads.html">Downloads</a>
+      <a href="clickgui.html">ClickGUI Demo</a>
+    </nav>
+  </header>
 
-  <div class="main">
-    <div class="content">
-      <div class="center">
-        <h1 style="font-size: 50px;">CrossSine Client</h1>
-        <a href="https://github.com/shxp3/CrossSine/releases">
-          <button class="custom-btn btn-1">Download</button>
-          <a href="https://discord.gg/E4AbJZsaXq">
-            <button class="custom-btn btn-1">Discord</button>
-            <a href="file/CrossSine-b41.jar">
-              <button class="custom-btn btn-1">Last Build</button>
+  <main>
+
+    <!-- Hero -->
+    <section class="hero">
+      <div class="hero-badge">Beta · Build 48</div>
+      <h2>The Minecraft Client<br>Built Different</h2>
+      <p>CrossSine is a powerful mod client crafted for performance, precision, and clean design. Built from the ground up by Shape.</p>
+      <div class="hero-actions">
+        <a href="downloads.html" class="btn btn-primary">⬇ Download Now</a>
+        <a href="#features" class="btn btn-ghost">See Features</a>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-value">48</span>
+        <span class="stat-label">Builds Released</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">60+</span>
+        <span class="stat-label">Modules</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">1.8.9</span>
+        <span class="stat-label">MC Version</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value">2</span>
+        <span class="stat-label">GUI Themes</span>
       </div>
     </div>
-    <div class="footer">
-      <div class="ft-l">
-        <img src="">
-        </a>
-        <div class="changelog">
-          <h4>ChangeLog</h4>  
-          <h3>Last Updated</h3>
-          <h2>UTC+7 14:01(26/11/2024)</h2>
-              <div>
-              </div>
+
+    <div class="divider"></div>
+
+    <!-- Features -->
+    <section class="features" id="features">
+      <div class="section-label">
+        <h3>Everything You Need</h3>
+        <p>Modules designed to give you the edge, your way.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">⚔️</div>
+          <h4>Combat Enhancements</h4>
+          <p>KillAura, Reach, Velocity, AutoBlock and more — tuned for competitive play.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🏃</div>
+          <h4>Movement Tweaks</h4>
+          <p>Sprint, Speed, NoSlow, TargetStrafe and full movement correction support.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎨</div>
+          <h4>Customizable UI</h4>
+          <p>Dropdown GUI with Filled & Outline themes. Accent colors powered by ClientTheme.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">👁️</div>
+          <h4>Visual Improvements</h4>
+          <p>Chams, ESP, Animations, CameraClip, Cape renderer and more visual modules.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🌐</div>
+          <h4>Discord Rich Presence</h4>
+          <p>Shows your client status live on Discord so your friends always know what you're doing.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔧</div>
+          <h4>Config System</h4>
+          <p>Save, load and share configs instantly. Full per-module value persistence.</p>
         </div>
       </div>
-    </div>
+    </section>
 
+  </main>
+
+  <footer>
+    <p>© 2026 <span>CrossSine</span> — All rights reserved. Built by Shape.</p>
+  </footer>
+
+  <script>
+    /* ── Page transition ── */
+    document.body.classList.add('page-entering');
+
+    document.querySelectorAll('nav a').forEach(link => {
+      link.addEventListener('click', function(e) {
+        const href = this.getAttribute('href');
+        if (!href || href.startsWith('#') || href.startsWith('http')) return;
+        e.preventDefault();
+        this.classList.add('nav-flash');
+        document.body.classList.remove('page-entering');
+        document.body.classList.add('page-leaving');
+        setTimeout(() => { window.location.href = href; }, 240);
+      });
+    });
+  </script>
 </body>
-
 </html>
