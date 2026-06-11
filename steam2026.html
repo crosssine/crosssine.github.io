@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ESP32 Smart Lock — Component List</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0b0f14;
+      --surface: #111822;
+      --border: #1e2d3d;
+      --accent: #00d4ff;
+      --text: #c8d8e8;
+      --muted: #526070;
+      --mono: 'Share Tech Mono', monospace;
+      --sans: 'Inter', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    header {
+      position: relative;
+      z-index: 1;
+      padding: 60px 24px 40px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    h1 {
+      font-family: var(--mono);
+      font-size: clamp(28px, 6vw, 52px);
+      font-weight: 400;
+      color: #fff;
+      line-height: 1.1;
+    }
+    h1 span { color: var(--accent); }
+    .subtitle {
+      margin-top: 14px;
+      font-size: 14px;
+      font-weight: 300;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 32px;
+      flex-wrap: wrap;
+    }
+    .stat-num {
+      font-family: var(--mono);
+      font-size: 28px;
+      color: var(--accent);
+    }
+    .stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-top: 4px;
+    }
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .section-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* GRID */
+    .components-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 3px solid transparent;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      cursor: default;
+    }
+    .card:hover {
+      border-top-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,212,255,0.1);
+    }
+
+    /* Image area */
+    .card-img-wrap {
+      width: 100%;
+      height: 180px;
+      background: #0d1520;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+    }
+    .card-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 12px;
+      transition: transform 0.3s;
+    }
+    .card:hover .card-img-wrap img {
+      transform: scale(1.05);
+    }
+    .card-index-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--accent);
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(0,212,255,0.3);
+      border-radius: 3px;
+      padding: 2px 7px;
+    }
+
+    /* Card body */
+    .card-body {
+      padding: 16px 18px 18px;
+    }
+    .card-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #e8f4ff;
+      letter-spacing: 0.01em;
+      line-height: 1.3;
+    }
+    .card-tag {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 6px;
+      letter-spacing: 0.08em;
+    }
+
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 24px;
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+    footer span { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      .components-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .card-img-wrap { height: 130px; }
+    }
+    @media (max-width: 380px) {
+      .components-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">// hardware manifest v1.0</p>
+  <h1>ESP32 <span>Smart Lock</span><br>Component List</h1>
+  <p class="subtitle">IoT Access Control System — Bill of Materials</p>
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-num">11</div>
+      <div class="stat-label">Components</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">12V</div>
+      <div class="stat-label">Power Supply</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">ESP32</div>
+      <div class="stat-label">Controller</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <p class="section-label">component manifest</p>
+  <div class="components-grid">
+
+    <!-- 01 ESP32 DevKit V1 -->
+    <div class="card">
+      <div class="card-img-wrap">
+        <span class="card-index-badge">01</span>
+        <img src="file/image/steam/esp32devkit.jpg" 
+             alt="ESP32 DevKit V1"
+             onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/24701-ESP32-DevkitC-03.jpg/800px-24701-ESP32-DevkitC-03.jpg'"/>
+      </div>
+      <div class="card-body">
+        <div class="card-name">ESP32 DevKit V1</div>
+        <div class="card-tag">MICROCONTROLLER · Wi-Fi + Bluetooth</div>
+      </div>
+    </div>
+
+    <!-- 02 ESP32-CAM -->
+    <div class="card">
+      <div class="card-img-wrap">
+        <span class="card-index-badge">02</span>
+        <img src="file/image/steam/ESP32cam.jpg"
+             alt="ESP32-CAM"
+             onerror="this.src='https://i0.wp.com/randomnerdtutorials.com/wp-content/uploads/2019/03/ESP32-CAM-pinout-new.png'"/>
+      </div>
+      <div class="card-body">
+        <div class="card-name">ESP32-CAM</div>
+        <div class="card-tag">CAMERA MODULE · OV2640 2MP</div>
+      </div>
+    </div>
+
+    <!-- 03 Barcode Scanner GM65/GM66 -->
+    <div class="card">
+      <div class="card-img-wrap">
+        <span class="card-index-badge">03</span>
+        <img src="file/image/steam/barcodescanner.jpg"
+             alt="GM65 GM66 Barcode Scanner"
+             onerror="this.src='https://ae01.alicdn.com/kf/Sb75ee08e2b874d8bbbe98c7e4c36cd5dp.jpg'"/>
+      </div>
+      <div class="card-body">
+        <div class="card-name">Barcode Scanner Module (GM65/GM66)</div>
+        <div class="card-tag">SCANNER · 1D/2D QR Code Reader</div>
+      </div>
+    </div>
+
+    <!-- 04 Solenoid Lock 12V -->
+    <div class="card">
+      <div class="card-img-wrap">
+        <span class="card-index-badge">04</span>
+        <img src="file/image/steam/Solenoidlock.jpg"
+             alt="Solenoid Lock 12V"
+             onerror="this.src='https://m.media-amazon.com/images/I/71ZC0iWlsQL._AC_SL1500_.jpg'"/>
+      </div>
+      <div class="card-body">
+        <div class="card-name">Solenoid Lock 12V</div>
+        <div class="card-tag">ACTUATOR · 12V DC Electromagnetic</div>
+      </div>
+    </div>
+
+    <!-- 05 Relay Module -->
+    <div class="card">
+      <div class="card-img-wrap">
+        <span class="card-index-badge">05</span>
+        <img src="file/image/steam/relaymodule.jpg"
+             alt="Relay Module"
+             onerror="this.src='https://components101.com/sites/default/files/component_pin/relay-module-pinout.jpg'"/>
+      </div>
+      <div class="card-body">
+        <div class="card-name">Relay Module</div>
+        <div class="card-tag">SWITCHING · Controls High-Voltage Circuit</div>
+      </div>
+    </div>
+
+    <!-- 06 Magnetic Door Sensor -->
+    <div class="card">
+      <div class="card-img-wrap">
+        <span class="card-index-badge">06</span>
+        <img src="file/image/steam/MagneticDoorSensor.jpg"
+             alt="Magnetic Door Sensor"
+             onerror="this.src='https://m.media-amazon.com/images/I/61z0PJB1R4L._AC_SL1500_.jpg'"/>
+      </div>
+      <div class="card-body">
+        <div class="card-name">Magnetic Door Sensor</div>
+        <div class="card-tag">SENSOR · Reed Switch / Door State</div>
+      </div>
+    </div>
+
+    <!-- 07 HC-SR04 -->
+    <div class="card">
+      <div class="card-img-wrap">
+        <span class="card-index-badge">07</span>
+        <img src="file/image/steam/HCSR04.jpg"
+             alt="HC-SR04 Ultrasonic Sensor"
+             onerror="this.src='https://components101.com/sites/default/files/component_pin/HCSR04-Ultrasonic-Sensor-Pinout.jpg'"/>
+      </div>
+      <div class="card-body">
+        <div class="card-name">Ultrasonic Sensor HC-SR04</div>
+        <div class="card-tag">SENSOR · 2cm–400cm Range Detection</div>
+      </div>
+    </div>
+
+    <!-- 08 Buzzer -->
+    <div class="card">
+      <div class="card-img-wrap">
+        <span class="card-index-badge">08</span>
+        <img src="file/image/steam/buzzer.jpg"
+             alt="Buzzer Module"
+             onerror="this.src='https://components101.com/sites/default/files/component_pin/Buzzer-Pinout.jpg'"/>
+      </div>
+      <div class="card-body">
+        <div class="card-name">Buzzer</div>
+        <div class="card-tag">OUTPUT · Audio Alert / Notification</div>
+      </div>
+    </div>
+
+    <!-- 09 LED Status -->
+    <div class="card">
+      <div class="card-img-wrap">
+        <span class="card-index-badge">09</span>
+        <img src="file/image/steam/ledmodule.jpg"
+             alt="LED Status Indicator"
+             onerror="this.src='https://m.media-amazon.com/images/I/61vNbCQnO2L._AC_SL1200_.jpg'"/>
+      </div>
+      <div class="card-body">
+        <div class="card-name">LED Status</div>
+        <div class="card-tag">OUTPUT · Visual State Indicator</div>
+      </div>
+    </div>
+
+    <!-- 10 UV-C LED Module -->
+    <div class="card">
+      <div class="card-img-wrap">
+        <span class="card-index-badge">10</span>
+        <img src="file/image/steam/UV-CLEDModule.jpg"
+             alt="UV-C LED Module"
+             onerror="this.src='https://m.media-amazon.com/images/I/61Ol5bPcVWL._AC_SL1200_.jpg'"/>
+      </div>
+      <div class="card-body">
+        <div class="card-name">UV-C LED Module</div>
+        <div class="card-tag">OUTPUT · Ultraviolet Disinfection</div>
+      </div>
+    </div>
+
+    <!-- 11 Adapter 12V -->
+    <div class="card">
+      <div class="card-img-wrap">
+        <span class="card-index-badge">11</span>
+        <img src="file/image/steam/Adapter.jpg"
+             alt="12V DC Adapter"
+             onerror="this.src='https://m.media-amazon.com/images/I/61Q7kNiGAuL._AC_SL1500_.jpg'"/>
+      </div>
+      <div class="card-body">
+        <div class="card-name">Adapter 12V</div>
+        <div class="card-tag">POWER · DC Power Supply Unit</div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <span>ESP32</span> Smart Access Control System &nbsp;·&nbsp; Bill of Materials &nbsp;·&nbsp; <span>11</span> Components
+</footer>
+
+</body>
+</html>
