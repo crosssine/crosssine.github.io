@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz ระบบต่อมไร้ท่อ</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Sarabun', 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #1e293b, #334155);
+    margin: 0;
+    padding: 20px;
+    min-height: 100vh;
+    color: #1e293b;
+  }
+  .container {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  h1 {
+    text-align: center;
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #cbd5e1;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+  }
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  }
+  .progress-bar {
+    background: #e2e8f0;
+    border-radius: 8px;
+    height: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .progress-fill {
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    height: 100%;
+    transition: width 0.3s ease;
+  }
+  .q-count {
+    font-size: 0.85rem;
+    color: #64748b;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+  .question {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 18px;
+    line-height: 1.5;
+    color: #0f172a;
+  }
+  .choice {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    font-size: 0.98rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: #1e293b;
+  }
+  .choice:hover:not(:disabled) {
+    border-color: #8b5cf6;
+    background: #f5f3ff;
+  }
+  .choice.correct {
+    background: #dcfce7;
+    border-color: #22c55e;
+    color: #166534;
+    font-weight: 700;
+  }
+  .choice.wrong {
+    background: #fee2e2;
+    border-color: #ef4444;
+    color: #991b1b;
+    font-weight: 700;
+  }
+  .choice:disabled {
+    cursor: default;
+  }
+  .feedback {
+    margin-top: 14px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct-fb { background: #dcfce7; color: #166534; }
+  .feedback.wrong-fb { background: #fee2e2; color: #991b1b; }
+  .nav-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  button.nav-btn {
+    background: #6366f1;
+    color: #fff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  button.nav-btn:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+  }
+  .result-screen {
+    text-align: center;
+  }
+  .result-score {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #6366f1;
+    margin: 10px 0;
+  }
+  .result-msg {
+    font-size: 1.1rem;
+    color: #475569;
+    margin-bottom: 20px;
+  }
+  .restart-btn {
+    background: #22c55e;
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .hidden { display: none; }
+  .review-list {
+    text-align: left;
+    margin-top: 20px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+  .review-item {
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+  }
+  .review-item.ok { background: #f0fdf4; border-left: 4px solid #22c55e; }
+  .review-item.bad { background: #fef2f2; border-left: 4px solid #ef4444; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🧪 Quiz ระบบต่อมไร้ท่อ (Endocrine System)</h1>
+  <div class="subtitle">รวม 52 ข้อ — เลือกคำตอบที่ถูกต้องที่สุด</div>
+
+  <div class="card" id="quizCard">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="q-count" id="qCount"></div>
+    <div class="question" id="questionText"></div>
+    <div id="choices"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="nav-row">
+      <span></span>
+      <button class="nav-btn" id="nextBtn" disabled>ข้อถัดไป →</button>
+    </div>
+  </div>
+
+  <div class="card result-screen hidden" id="resultCard">
+    <div>🎉 จบแบบทดสอบแล้ว!</div>
+    <div class="result-score" id="scoreText"></div>
+    <div class="result-msg" id="scoreMsg"></div>
+    <button class="restart-btn" id="restartBtn">ทำใหม่อีกครั้ง</button>
+    <div class="review-list" id="reviewList"></div>
+  </div>
+</div>
+
+<script>
+const questions = [
+{q:"1. ไฮโพทาลามัสสร้างฮอร์โมนขึ้นมา 2 ชนิด โดยปล่อยออกมาทางต่อมใต้สมองส่วนหลัง ฮอร์โมนตัวแรกทำหน้าที่เกี่ยวข้องกับการทำงานของไต ส่วนฮอร์โมนตัวหลังมีผลกับระบบสืบพันธุ์ ฮอร์โมนตัวแรกกับฮอร์โมนตัวหลังมีชื่อเรียงตามลำดับคือ",c:["ADH, Prolactin","Prolactin, ADH","ADH, Oxytocin","Oxytocin, ADH"],a:2},
+{q:"2. ต่อมใต้สมองส่วนหน้าสร้างฮอร์โมน 2 ชนิด ทำหน้าที่เกี่ยวกับเนื้อเยื่อร่างกายโดยทั่วไป คือ",c:["ACTH, FSH","ACTH, Somatotrophin","Prolactin, FSH","Prolactin, Somatotrophin"],a:3},
+{q:"3. ฮอร์โมนกับผลที่เกิดคู่ใดไม่ถูกต้อง",c:["ออกซิโทซิน - กระตุ้นมดลูกให้บีบตัวในช่วงคลอดลูก","ไทรอกซิน - กระตุ้นกระบวนการเมแทบอลิซึม","อินซูลิน – กระตุ้นการสลายตัวของไกลโคเจนในตับ","ACTH - กระตุ้นการหลั่งกลูโคคอร์ติซอยด์ของอะดรีนัลคอร์เทกซ์"],a:2},
+{q:"4. ข้อความใดที่เกี่ยวข้องกับฮอร์โมนที่ไม่ถูกต้อง",c:["ฮอร์โมนเป็นสารเคมีที่ถูกส่งไปยังเซลล์เป้าหมายโดยผ่านระบบหมุนเวียนเลือด","ฮอร์โมนที่เป็นสารประกอบประเภทเดียวกัน ปกติแล้วจะทำหน้าที่เหมือนๆกัน","ฮอร์โมนควบคุมสมดุลด้วยการใช้การควบคุมในทางตรงกันข้าม","ฮอร์โมนหลั่งออกมาจากเซลล์พิเศษ ซึ่งปกติอยู่ในต่อมไร้ท่อ"],a:1},
+{q:"5. อวัยวะใดไม่สร้างฮอร์โมน",c:["ส่วนของหัวใจ","ต่อมใต้สมองหน้า","ต่อมใต้สมองส่วนหลัง","ต่อมไพเนียล"],a:2},
+{q:"6. อวัยวะใดที่สามารถผลิตได้ทั้งน้ำย่อยและฮอร์โมน",c:["ตับ","ตับอ่อน","ลำไส้เล็ก","ลำไส้ใหญ่"],a:1},
+{q:"7. ต่อมภายในร่างกายที่ทำหน้าที่ได้ทั้งต่อมไร้ท่อและต่อมมีท่อ",c:["ต่อมอะดรีนัลและตับ","ตับอ่อนและอวัยวะสืบพันธุ์","ตับและตับอ่อน","ตับอ่อนและต่อมน้ำลาย"],a:1},
+{q:"8. Acromegaly เป็นโรคที่เกิดจากการมีฮอร์โมนใดมาก เมื่อตอนเป็นผู้ใหญ่",c:["Growth hormone จาก Posterior pituitary","Growth hormone จาก Anterior pituitary","Gonadotrophins จาก Posterior pituitary","Thyroxin จาก Thyroid"],a:1},
+{q:"9. โรคคอพอกชนิด Simple goiter เกิดขึ้นจากสาเหตุใด",c:["ต่อมไทรอยด์ไม่สร้าง Thyroxin","ต่อมใต้สมองไม่สร้าง TSH","ก และ ข ถูก","ร่างกายขาดธาตุไอโอดีน"],a:3},
+{q:"10. การเปลี่ยนแปลงทางอารมณ์อย่างกระทันหันถึงขนาดที่แสดงออกมาในลักษณะที่ฝืนกับอุปนิสัยเดิม เช่น เอาเป็นไปยิงบุคคลที่ยั่วโทสะ เป็นผลจากการหลั่งฮอร์โมนใด",c:["นอร์อะดรีนาลิน จาก อะดรีนัลคอร์เทกซ์","อะดรีนาลิน จาก อะดรีนัลคอร์เทกซ์","นอร์อะดรีนาลิน จาก อะดรีนัลเมดัลลา","อะดรีนาลิน จาก อะดรีนัลเมดัลลา"],a:3},
+{q:"11. การที่ไก่ตัวผู้มีหงอน และขนที่หางยาวกว่าไก่ตัวเมีย เป็นเพราะการทำงานของฮอร์โมนใด",c:["Cortison","Estrogen","Testosterone","Glucagon"],a:2},
+{q:"12. ต่อมไร้ท่อที่เปลี่ยนแปลงโครงสร้าง และหน้าที่ในการผลิตฮอร์โมนมากที่สุดในร่างกายคือ",c:["รังไข่","ต่อมใต้สมอง","อัณฑะ","สายรก"],a:0},
+{q:"13. ไอโอดีน เป็นสิ่งจำเป็นสำหรับ",c:["ผลิต TSH จากต่อมใต้สมอง","ผลิต Thyroxin จากต่อมไทรอยด์","ห้ามไม่ให้เกิดคอพอก","เมแทบอลิซึมทั่วๆไปของร่างกาย"],a:1},
+{q:"14. ต่อมไร้ท่อที่มีบทบาทควบคุมการใช้แคลเซียม ได้แก่",c:["ไทรอยด์","ไทรอยด์และต่อมหมวกไต","ไทรอยด์และไพเนียล","ไทรอยด์และพาราไทรอยด์"],a:3},
+{q:"15. ในขณะที่ผู้หญิงมีประจำเดือนนั้น ระดับฮอร์โมนเพศในเลือดควรจะ",c:["มีอีสโทรเจนสูงมาก","มีโพรเจสเทอโรนสูงมาก","มีอีสโทรเจนและโพรเจสเทอโรนสูงมาก","มีอีสโทรเจนและโพรเจสเทอโรนต่ำมาก"],a:3},
+{q:"16. ฮอร์โมนที่มีความสัมพันธ์กันน้อยที่สุด ได้แก่",c:["LH และ Testosterone","Calcitonin และ Parathyroid hormone","Oxytocin และ Mineralocorticoids","Insulin และ Glucocorticoids"],a:2},
+{q:"17. คนที่ถูกอดอาหารแล้วจัดให้รับประทานหวานจัดตลอดวันทั้ง 3 มื้อ หากร่างกายปกติ ในการตรวจสอบน้ำตาลจะพบปริมาณน้ำตาลสูงที่ใดบ้าง",c:["ในปัสสาวะ","ในปัสสาวะและเลือด","ในเลือด","ในเลือดเฉพาะหลังอาหารเล็กน้อย"],a:3},
+{q:"18. ชื่อที่เกี่ยวข้องกันมากที่สุด ได้แก่",c:["ความเครียด และ ACTH","ถุงน้ำดีและการย่อยโปรตีน","ความตกใจและการตกไข่","ต่อมไพเนียลและต่อมพาราไทรอยด์"],a:0},
+{q:"19. เนื้อเยื่อที่ผลิต Steroid hormone คือ",c:["รังไข่และอะดรีนัลเมดุลลา","อัณฑะและอะดรีนัลคอร์เทกซ์","Leydig's cells และ Sertoli cells","อะดรีนัลคอร์เทกซ์ และ Leydig's cells"],a:3},
+{q:"20. ฮอร์โมนที่สร้างมาจากเซลล์ประสาท ได้แก่",c:["Oxytocin และ Acetylcholine","Adrenalin และ Noradrenalin","Vasopressin และ Adrenalin","Noradrenalin และ Oxytocin"],a:3},
+{q:"21. ฮอร์โมนมีบทบาทสำคัญในการควบคุมเมแทบอลิซึมของคาร์โบไฮเดรต ได้แก่",c:["Cortisol Insulin Melatonin","Glucagon Calcitonin Adrenaline","Adrenaline Cortisol Glucagon","Insulin Adrenaline Oxytocin"],a:2},
+{q:"22. ฮอร์โมนที่ไม่ได้หลั่งมาจากต่อมใต้สมองส่วนหน้าคือ",c:["ACTH","STH (GH)","TSH","ADH"],a:3},
+{q:"23. หากต่อมใต้สมองทุกๆ พู ถูกทำลาย ผลที่จะติดตามมาภายในสามสัปดาห์คือ",c:["ตาย","ปัสสาวะมาก","เกิดเป็นโรคเบาหวาน","หมดความรู้สึกทางเพศ"],a:1},
+{q:"24. หากร่างกายไม่ได้รับไอโอดีนติดต่อกันเป็นเวลานานๆ โรคที่น่าจะเป็นได้ง่ายที่สุดควรจะเป็น",c:["คอพอกและตาโปน","Myxedema","คอพอก และ Myxedema","Grave's disease"],a:2},
+{q:"25. เนื้อเยื่อของคอร์ปัสลูเทียมส่วนใหญ่จะสร้างมาจาก",c:["Primordial follicle","Theca externa","Interstitial tissue","Granulosa cells"],a:3},
+{q:"26. ข้อความใดที่ไม่เป็นความจริง",c:["ผู้หญิงปกติจะไม่สามารถสร้างฮอร์โมนเพศชายออกมาได้เลย","อะดรีนัลคอร์เทกซ์ เป็นต่อมไร้ท่อที่สร้างสารสเตอรอยด์ได้มากชนิดที่สุด","รังไข่เป็นอวัยวะที่มีการเปลี่ยนแปลงทั้งรูปร่าง และหน้าที่การทำงานได้มากที่สุด","ต่อมใต้สมองพูหน้าเป็นต่อมไร้ท่อที่มีชนิดของเซลล์มากที่สุด"],a:0},
+{q:"27. ไทรอกซินในเด็กทำหน้าที่ควบคุม",c:["การเติบโตของร่างกาย","การพัฒนาทางจิตใจ","เมแทบอลิซึมของร่างกาย","การสะสมไขมันของร่างกาย"],a:2},
+{q:"28. ต่อมไร้ท่อที่การทำงานของมันถูกควบคุมโดยตรงด้วยระบบประสาท คือ",c:["ต่อมใต้สมองพูหลัง","ต่อมไพเนียล","ต่อมพาราไทรอยด์","เกาะแลงเกอร์ฮานส์"],a:0},
+{q:"29. ฮอร์โมนที่สร้างมาจากนิวโรซีคริทอรีเซลล์ ได้แก่",c:["กลูคาร์กอน","Mineralocorticoid","พาราโทโมน","ออกซิโทซิน"],a:3},
+{q:"30. เพศหญิงช่วงที่มีประจำเดือนระดับฮอร์โมนที่ต่ำที่สุดคือ",c:["FSH","LH","อีสโทรเจน","โพรเจสเทอโรน"],a:2},
+{q:"31. ถ้าแอลฟาเซลล์ ของไอส์เลตออฟแลงเกอร์ฮานส์บางส่วนถูกทำลาย",c:["ทำให้เกิดโรคเบาหวาน","ทำให้ปริมาณกลูคากอนสูงกว่าปกติมาก","ทำให้ปริมาณอินซูลินต่ำกว่าปกติมาก","อาจไม่มีผลกระทบกระเทือนมากนัก เพราะมีสารอื่นช่วยอยู่"],a:3},
+{q:"32. สารที่ทำหน้าที่เป็นทั้งนำกระแสความรู้สึกและฮอร์โมน คือ",c:["อะซิติล โคลีน","นอร์อะดรีนาลิน","ออกซิโทซิน","วาโซเพรสซิน"],a:1},
+{q:"33. ฮอร์โมนที่มีบทบาทสำคัญในการเพิ่มปริมาณของน้ำตาลกลูโคสในเลือดคือ",c:["อินซูลิน","กลูคากอน","คอร์ติซอล","วาโซเพรสซิน"],a:1},
+{q:"34. อวัยวะของคนที่ทำหน้าที่หลั่งเอนไซม์และฮอร์โมนคือ",c:["ต่อมหมวกไต","ต่อมน้ำลาย","ตับอ่อน","ตับ"],a:2},
+{q:"35. ข้อใดที่มีความสัมพันธ์กันมากที่สุด",c:["ต่อมไทรอยด์ ไทรอกซิน ไฮโพทาลามัส ต่อมใต้สมองส่วนหน้า","ตับ อินซูลิน น้ำดี น้ำย่อย","พาราทอร์โมน ต่อมหมวกไต กลูคากอน แคลเซียม","รังไข่ อีสโทรเจน ฟีโรโมน การเจริญของมดลูก"],a:0},
+{q:"36. การชักนำให้กบตัวเมียสร้างและผลิตไข่ในห้องปฏิบัติการโดยการฉีดสารที่สกัดจากกบตัวอื่นเข้าที่ท้องกบตัวเมียนั้น สารดังกล่าวสกัดจากส่วนใด",c:["ต่อมใต้สมอง","ต่อมไทรอยด์","ไข่กบ","อัณฑะ"],a:0},
+{q:"37. ถ้า 1=estrogen 2=progesterone 3=luteinizing ระดับของฮอร์โมนหลังจากการตกไข่จะเป็นอย่างไร",c:["1 ลดลง, 2 เพิ่มขึ้น, 3 ลดลง","1 ลดลง, 2 เพิ่มขึ้น, 3 เพิ่มขึ้น","1 ลดลง, 2 ลดลง, 3 ลดลง","1 เพิ่มขึ้น, 2 เพิ่มขึ้น, 3 ลดลง"],a:0},
+{q:"38. ต่อมไร้ท่อชนิดใดที่ไม่ถูกควบคุมโดยตรงจากฮอร์โมนที่สร้างจากต่อมใต้สมอง",c:["ไทรอยด์","พาราไทรอยด์","อะดรีนอล คอร์เทกซ์","อินเตอร์สติเชียล เซลล์"],a:1},
+{q:"39. แอลโดสเตอโรนเป็นฮอร์โมนที่สร้างมาจากที่ใด",c:["อัณฑะและควบคุมลักษณะของเพศชาย","อัณฑะและควบคุมลักษณะของเพศชายร่วมกับเทสโทสเทอโรน","อะดรีนัล คอร์เทกซ์ และควบคุมสมดุลของโซเดียมในเลือด","อะดรีนัล คอร์เทกซ์ และควบคุมสมดุลของน้ำตาลในเลือด"],a:2},
+{q:"40. ในเซลล์ของคอร์ปัสลูเทียม มีออร์แกเนลล์ใดที่มีลักษณะเด่น ซึ่งทำหน้าที่เกี่ยวกับการสร้างฮอร์โมนโพรเจสเทอโรน",c:["กอลจิ คอมเพล็กซ์","ร่างแหเอนโดพลาซึมชนิดมีไรโบโซมเกาะ","ร่างแหเอนโดพลาซึมชนิดไม่มีไรโบโซมเกาะ","ก และ ข"],a:2},
+{q:"41. ฮอร์โมนชนิดใดที่มีผลต่อการเปลี่ยนแปลงสีตัวของสัตว์เลือดเย็นได้น้อยที่สุด",c:["เมลาโทนิน","ACTH","MSH","ADH"],a:3},
+{q:"42. สิ่งใดต่อไปนี้ที่มีบทบาทควบคุมการใช้แคลเซียมในร่างกายน้อยที่สุด",c:["วิตามินดี","ต่อมไทรอยด์","ต่อมพาราไทรอยด์","ต่อมใต้สมอง"],a:3},
+{q:"43. ฮอร์โมนคู่ใดต่อไปนี้ให้ผลคล้ายกัน ยกเว้นคู่ใด",c:["แคลซิโทนิน, พาราทอร์โมน","กลูคากอน, คอร์ติซอล","อะดรีนาลิน, นอร์อะดรีนาลิน","อิสโทรเจน, โพรเจสเทอโรน"],a:0},
+{q:"44. ฮอร์โมนที่สร้างจากเซลล์ประสาท ได้แก่",c:["ออกซิโทซิน","คอร์ติซอล","เมลาโทนิน","พาราทอร์โมน"],a:0},
+{q:"45. ฮอร์โมนที่เกี่ยวข้องกับการทำงานของการขับถ่ายของไต ได้แก่",c:["ADH, Aldosterone","Cortisol, Parathormone","Vasopressin, Adrenocorticotrophic","Mineralocorticoid, Epinephrine"],a:0},
+{q:"46. ต่อมไร้ท่อชนิดใดต่อไปนี้ที่มีขนาดเล็กที่สุด",c:["เกาะแลงเกอร์ฮานส์","พาราไทรอยด์","คอร์ปัสลูเทียม","ไพเนียล"],a:1},
+{q:"47. ฮอร์โมนใดที่มีผลต่อการเติบโตของร่างกายน้อยที่สุด",c:["อินซูลิน","ไทรอกซิน","เทสโทสเทอโรน","แอลโดสเตอโรน"],a:3},
+{q:"48. มีฮอร์โมนหลายชนิดที่ควบคุมเมแทบอลิซึมของคาร์โบไฮเดรต ฮอร์โมนเหล่านี้ผลิตมาจากส่วนใด",c:["อะดรีนัลคอร์เทกซ์, ต่อมใต้สมองพูหน้า, อะดรีนัลเมดัลลา","หมู่เกาะแลงเกอร์ฮานส์, ไทรอยด์, ไฮโพทาลามัส","ตับอ่อน, ไพเนียล, พาราไทรอยด์","ต่อมใต้สมองพูหลัง, ต่อมใต้สมองพูกลาง, ต่อมหมวกไต"],a:0},
+{q:"49. ต่อมไร้ท่อที่มีบทบาทสำคัญควบคุมการเติบโต ได้แก่ชนิดใด",c:["ต่อมใต้สมองพูหน้า","ไทรอยด์ เลย์ดิกเซลล์ ต่อมใต้สมองพูหลัง","อะดรีนัลคอร์เทกซ์ ต่อมใต้สมองพูหน้า ไทรอยด์","หมู่เกาะแลงเกอร์ฮานส์ ไทรอยด์ รังไข่"],a:2},
+{q:"50. กรณีใดที่มีผลทำให้หัวใจทำงานน้อยลง และมีการหลั่งน้ำลายใสๆ ออกมาปริมาณมาก",c:["กระตุ้นประสาทซิมพาเทติก","กระตุ้นต่อมหมวกไต","ฉีดอะดรีนาลินหรือกระตุ้นประสาทซิมพาเทติก","ฉีดเอพิเนฟรินและนอร์เอพิเนฟริน"],a:0},
+{q:"51. ฮอร์โมนใดที่มีบทบาทสำคัญในการควบคุมสมดุลของไอออนของเกลือแร่ในเลือด",c:["พาราไทรอยด์ และ แอลโดสเตอโรน","มินิรอลโลคอร์ติคอยด์ และ วาโซเพรสซิน","แคลซิโทนิน และคอร์ติซอล","อินซูลิน และไทรอกซิน"],a:0},
+{q:"52. นักวิทยาศาสตร์เคยทดลองในสุนัขและพบว่า สัตว์ที่ตัดต่อมใต้สมองและตับอ่อน จะรอดชีวิตได้ดีกว่าสัตว์ที่ถูกตัดตับอ่อนแต่เพียงอย่างเดียว คำอธิบายที่น่าจะเป็นไปได้ควรจะเป็นอย่างไร",c:["ขาดฮอร์โมนที่ช่วยให้เป็นเบาหวานได้ง่ายขึ้น","สัตว์มีอัตราเมแทบอลิซึมต่ำมากกว่าตัดตับอ่อนอย่างเดียว","อะดรีนัล คอร์เทกซ์ สร้างกลูโคคอร์ติคอยด์ได้น้อยลง","ช่วยให้ร่างกายนำกลูโคสไปใช้ประโยชน์ได้"],a:2},
+];
+
+let current = 0, score = 0, answered = false;
+const answers = [];
+
+function shuffle(arr) {
+  // returns array of indices shuffled, and mapping
+  return arr.map((v,i)=>i).sort(()=>Math.random()-0.5);
+}
+
+function loadQuestion() {
+  answered = false;
+  const q = questions[current];
+  document.getElementById('qCount').textContent = `ข้อที่ ${current+1} / ${questions.length}   คะแนน: ${score}`;
+  document.getElementById('progressFill').style.width = `${(current/questions.length)*100}%`;
+  document.getElementById('questionText').textContent = q.q;
+  const choicesDiv = document.getElementById('choices');
+  choicesDiv.innerHTML = '';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('nextBtn').disabled = true;
+
+  q.c.forEach((choiceText, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice';
+    btn.textContent = choiceText;
+    btn.onclick = () => selectAnswer(idx);
+    choicesDiv.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const buttons = document.querySelectorAll('.choice');
+  buttons.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.a) btn.classList.add('correct');
+    else if (i === idx && idx !== q.a) btn.classList.add('wrong');
+  });
+  const fb = document.getElementById('feedback');
+  const isCorrect = idx === q.a;
+  if (isCorrect) {
+    score++;
+    fb.textContent = '✅ ถูกต้อง!';
+    fb.className = 'feedback show correct-fb';
+  } else {
+    fb.textContent = `❌ ยังไม่ถูก คำตอบที่ถูกคือ: ${q.c[q.a]}`;
+    fb.className = 'feedback show wrong-fb';
+  }
+  answers.push({q: q.q, correct: isCorrect, correctAnswer: q.c[q.a], picked: q.c[idx]});
+  document.getElementById('nextBtn').disabled = false;
+  document.getElementById('qCount').textContent = `ข้อที่ ${current+1} / ${questions.length}   คะแนน: ${score}`;
+}
+
+document.getElementById('nextBtn').onclick = () => {
+  current++;
+  if (current < questions.length) {
+    loadQuestion();
+  } else {
+    showResult();
+  }
+};
+
+function showResult() {
+  document.getElementById('quizCard').classList.add('hidden');
+  document.getElementById('resultCard').classList.remove('hidden');
+  document.getElementById('scoreText').textContent = `${score} / ${questions.length}`;
+  const pct = Math.round((score/questions.length)*100);
+  let msg = '';
+  if (pct >= 80) msg = 'ยอดเยี่ยมมาก! เข้าใจระบบต่อมไร้ท่อดีมาก 🎉';
+  else if (pct >= 60) msg = 'ทำได้ดี! ทบทวนอีกนิดจะเป๊ะเลย 👍';
+  else msg = 'ลองทบทวนเนื้อหาแล้วมาทำใหม่นะ 💪';
+  document.getElementById('scoreMsg').textContent = `${pct}% — ${msg}`;
+
+  const reviewList = document.getElementById('reviewList');
+  reviewList.innerHTML = '<div style="font-weight:700;margin-bottom:8px;">สรุปคำตอบที่ผิด:</div>';
+  const wrongOnes = answers.filter(a => !a.correct);
+  if (wrongOnes.length === 0) {
+    reviewList.innerHTML += '<div class="review-item ok">ไม่มีข้อที่ตอบผิดเลย เก่งมาก!</div>';
+  } else {
+    wrongOnes.forEach(a => {
+      const div = document.createElement('div');
+      div.className = 'review-item bad';
+      div.innerHTML = `<div>${a.q}</div><div style="margin-top:4px;">คุณตอบ: ${a.picked} | ที่ถูกคือ: <b>${a.correctAnswer}</b></div>`;
+      reviewList.appendChild(div);
+    });
+  }
+}
+
+document.getElementById('restartBtn').onclick = () => {
+  current = 0; score = 0; answered = false;
+  answers.length = 0;
+  document.getElementById('resultCard').classList.add('hidden');
+  document.getElementById('quizCard').classList.remove('hidden');
+  loadQuestion();
+};
+
+loadQuestion();
+</script>
+</body>
+</html>
