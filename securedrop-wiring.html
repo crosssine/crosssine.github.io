@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureDrop — Wiring Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a1f17;
+    --bg-2: #0d2921;
+    --panel: #123328;
+    --panel-2: #163d30;
+    --line: #245240;
+    --line-soft: #1c3e30;
+    --silk: #eef0e6;
+    --silk-dim: #a9baaf;
+    --copper: #d3a25a;
+    --copper-bright: #f0c37e;
+    --trace: #48e0a0;
+    --trace-dim: #2f8f6c;
+    --danger: #e2543d;
+    --danger-bg: #351d18;
+    --warn: #e3b23c;
+    --blue: #5aa9d6;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(circle at 1px 1px, rgba(72,224,160,0.055) 1px, transparent 0) 0 0/22px 22px,
+      linear-gradient(180deg, var(--bg), var(--bg-2) 60%, var(--bg));
+    color: var(--silk);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    line-height: 1.6;
+    padding-bottom: 80px;
+  }
+  h1,h2,h3, .display{
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  a{color: var(--copper-bright);}
+
+  /* ---------- header / title plate ---------- */
+  header{
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 56px 24px 32px;
+  }
+  .plate{
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: linear-gradient(160deg, var(--panel), var(--panel-2));
+    padding: 32px 32px 26px;
+    position: relative;
+    overflow: hidden;
+  }
+  .plate::before{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 38px, rgba(211,162,90,0.05) 38px 39px),
+      repeating-linear-gradient(0deg, transparent 0 38px, rgba(211,162,90,0.05) 38px 39px);
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: var(--trace);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--trace); box-shadow:0 0 8px var(--trace);}
+  h1{
+    font-size: clamp(30px, 5vw, 46px);
+    font-weight: 700;
+    color: var(--silk);
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+  }
+  h1 span{color: var(--copper-bright);}
+  .subtitle{
+    color: var(--silk-dim);
+    font-size: 15px;
+    max-width: 640px;
+    margin-bottom: 22px;
+  }
+  .meta-row{
+    display:flex; flex-wrap:wrap; gap: 10px 28px;
+    font-size: 12.5px; color: var(--silk-dim);
+    border-top: 1px dashed var(--line);
+    padding-top: 16px;
+  }
+  .meta-row b{color: var(--copper);}
+
+  /* ---------- nav / TOC as pin header ---------- */
+  nav{
+    max-width: 1040px; margin: 0 auto; padding: 0 24px 40px;
+  }
+  .pinheader{
+    display:flex; flex-wrap:wrap; gap:8px;
+    border: 1px solid var(--line-soft);
+    background: rgba(18,51,40,0.5);
+    border-radius: var(--radius);
+    padding: 14px;
+  }
+  .pin{
+    display:flex; align-items:center; gap:8px;
+    padding: 6px 12px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    font-size: 12.5px;
+    color: var(--silk-dim);
+    text-decoration:none;
+    background: var(--panel);
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  .pin:hover{ border-color: var(--trace); color: var(--silk); background: var(--panel-2);}
+  .pin .num{color: var(--copper); font-weight:600;}
+
+  /* ---------- sections ---------- */
+  section{
+    max-width: 1040px; margin: 0 auto; padding: 0 24px 56px;
+  }
+  .sec-head{
+    display:flex; align-items:baseline; gap:14px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 12px;
+  }
+  .sec-num{
+    font-family:'IBM Plex Mono';
+    color: var(--copper);
+    font-size: 13px;
+    border: 1px solid var(--copper);
+    padding: 2px 8px;
+    border-radius: 2px;
+    flex-shrink:0;
+  }
+  .sec-head h2{
+    font-size: 22px; color: var(--silk); font-weight:600;
+  }
+  .sec-desc{color:var(--silk-dim); font-size:13.5px; margin: -8px 0 20px;}
+
+  /* ---------- BOM table ---------- */
+  .table-wrap{
+    border:1px solid var(--line-soft); border-radius: var(--radius); overflow:hidden;
+  }
+  table{ width:100%; border-collapse: collapse; font-size: 13.5px;}
+  thead th{
+    text-align:left; background: var(--panel-2); color: var(--copper-bright);
+    padding: 10px 14px; font-weight:600; font-size:12px; letter-spacing:.04em;
+    text-transform:uppercase; border-bottom:1px solid var(--line);
+  }
+  tbody td{
+    padding: 10px 14px; border-bottom:1px solid var(--line-soft); color: var(--silk-dim);
+    vertical-align: top;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background: rgba(72,224,160,0.045);}
+  td.qty{color: var(--trace); font-weight:600; text-align:center; width:60px;}
+  td.name{color: var(--silk); font-weight:500;}
+  code, .code{
+    font-family:'IBM Plex Mono'; background: rgba(211,162,90,0.12); color: var(--copper-bright);
+    padding: 1px 6px; border-radius: 2px; font-size:.92em;
+  }
+
+  /* ---------- power diagram ---------- */
+  .power-diagram{
+    border:1px solid var(--line-soft); border-radius: var(--radius);
+    background: var(--panel);
+    padding: 22px;
+    font-size: 13px;
+    overflow-x:auto;
+  }
+  .p-source{
+    display:inline-block; border:1px solid var(--warn); color:var(--warn);
+    padding:6px 14px; border-radius:2px; font-weight:600; margin-bottom:18px;
+  }
+  .branch{
+    display:flex; align-items:center; gap:14px; margin: 10px 0; padding-left: 18px;
+    border-left: 2px solid var(--trace-dim);
+    position:relative;
+  }
+  .branch::before{
+    content:""; position:absolute; left:-2px; top:50%; width:16px; height:2px; background:var(--trace-dim);
+  }
+  .branch .load{
+    color: var(--silk); font-weight:600; min-width:190px;
+  }
+  .branch .via{ color: var(--copper); font-size:12px;}
+  .branch .amp{ color: var(--silk-dim); font-size:12px; margin-left:auto;}
+  .sub-branch{
+    margin-left: 34px; border-left: 1px dashed var(--line);
+    padding-left: 18px; margin-top: 6px;
+  }
+  .sub-branch .branch{border-left:1px solid var(--line);}
+  .sub-branch .branch::before{background:var(--line);}
+
+  /* ---------- warning callouts ---------- */
+  .callout{
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin: 14px 0;
+    font-size: 13.5px;
+    border: 1px solid;
+    display:flex; gap:12px;
+  }
+  .callout .tag{
+    font-family:'Space Grotesk'; font-weight:700; font-size:11px; letter-spacing:.06em;
+    padding: 2px 8px; border-radius:2px; height:fit-content; white-space:nowrap;
+  }
+  .callout.danger{ background: var(--danger-bg); border-color: rgba(226,84,61,0.5); color:#f0b3a6;}
+  .callout.danger .tag{ background: var(--danger); color:#1a0e0c;}
+  .callout.warn{ background: rgba(227,178,60,0.08); border-color: rgba(227,178,60,0.4); color:#e6cf9b;}
+  .callout.warn .tag{ background: var(--warn); color:#241a05;}
+  .callout.info{ background: rgba(90,169,214,0.08); border-color: rgba(90,169,214,0.4); color:#b7d7ea;}
+  .callout.info .tag{ background: var(--blue); color:#071822;}
+
+  /* ---------- pin assignment tables ---------- */
+  .pin-table td.gpio{ color: var(--copper-bright); font-weight:600; white-space:nowrap;}
+  .pin-table td.func{ color:var(--silk);}
+  .badge{
+    display:inline-block; font-size:10.5px; padding:2px 6px; border-radius:2px;
+    border:1px solid var(--trace-dim); color: var(--trace); margin-left:6px; vertical-align:middle;
+  }
+  .badge.in{border-color:var(--blue); color:var(--blue);}
+  .badge.out{border-color:var(--copper); color:var(--copper);}
+  .badge.i2c{border-color:#c98ae0; color:#c98ae0;}
+
+  /* ---------- wiring connector diagram ---------- */
+  .wire-board{
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    background: var(--panel);
+    padding: 26px;
+  }
+  .wire-board h3{
+    font-size:14px; color:var(--copper-bright); margin-bottom:16px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .wire-board h3::before{content:"◆"; color:var(--trace); font-size:10px;}
+  .wire-row{
+    display:grid;
+    grid-template-columns: 150px 1fr 150px;
+    align-items:center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--line-soft);
+    font-size: 13px;
+  }
+  .wire-row:last-child{border-bottom:none;}
+  .wire-row .from, .wire-row .to{
+    padding: 6px 10px; border-radius:2px; text-align:center; font-weight:600;
+    border: 1px solid var(--line);
+  }
+  .wire-row .from{ color:var(--copper-bright); background: rgba(211,162,90,0.08);}
+  .wire-row .to{ color:var(--silk); background: rgba(238,240,230,0.04);}
+  .wire-line{
+    height:2px; background: repeating-linear-gradient(90deg, var(--trace) 0 6px, transparent 6px 10px);
+    position:relative;
+  }
+  .wire-line .note{
+    position:absolute; top:-19px; left:50%; transform:translateX(-50%);
+    font-size:11px; color:var(--silk-dim); white-space:nowrap; background:var(--panel); padding:0 6px;
+  }
+  .group-label{
+    font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--trace);
+    margin: 22px 0 4px; padding-top:14px; border-top:1px solid var(--line-soft);
+  }
+  .group-label:first-of-type{border-top:none; margin-top:0; padding-top:0;}
+
+  /* ---------- checklist ---------- */
+  .checklist{ list-style:none; display:grid; gap:10px;}
+  .checklist li{
+    display:flex; gap:12px; align-items:flex-start;
+    padding: 12px 14px; border:1px solid var(--line-soft); border-radius:var(--radius);
+    background: var(--panel); font-size:13.5px; color:var(--silk-dim);
+  }
+  .checklist li b{color:var(--silk);}
+  .checklist .n{
+    font-family:'Space Grotesk'; font-weight:700; color:var(--copper);
+    border:1px solid var(--copper); border-radius:50%; width:22px; height:22px;
+    display:flex; align-items:center; justify-content:center; font-size:11.5px; flex-shrink:0;
+  }
+
+  footer{
+    max-width:1040px; margin: 40px auto 0; padding: 20px 24px; text-align:center;
+    color: var(--silk-dim); font-size:12px; border-top:1px dashed var(--line-soft);
+  }
+
+  @media (max-width: 680px){
+    .wire-row{grid-template-columns: 1fr; text-align:center;}
+    .wire-line{height:20px; width:2px; margin:0 auto; background:repeating-linear-gradient(0deg, var(--trace) 0 6px, transparent 6px 10px);}
+    .wire-line .note{position:static; transform:none; display:block; margin:4px 0;}
+    .branch{flex-wrap:wrap;}
+    .branch .amp{margin-left:0;}
+  }
+
+  ::selection{ background: var(--trace); color:#04140d;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="plate">
+    <div class="eyebrow"><span class="dot"></span>Hardware Reference · Rev A</div>
+    <h1>SecureDrop <span>Wiring Guide</span></h1>
+    <p class="subtitle">คู่มือต่อวงจรฉบับสมบูรณ์สำหรับกล่องพัสดุอัจฉริยะ — ESP32 Main Controller, ESP32-CAM ×2, เซนเซอร์ และวงจรกำลังไฟ 12V</p>
+    <div class="meta-row">
+      <div>ควบคุมหลัก&nbsp;<b>ESP32 DevKit&nbsp;V1</b></div>
+      <div>แหล่งจ่าย&nbsp;<b>12V&nbsp;3A</b></div>
+      <div>ล็อก&nbsp;<b>Solenoid Fail-Secure</b></div>
+      <div>อ้างอิงจาก&nbsp;<b>docs/02_Hardware_and_Wiring.md</b></div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="pinheader">
+    <a class="pin" href="#bom"><span class="num">01</span> รายการอุปกรณ์</a>
+    <a class="pin" href="#power"><span class="num">02</span> วงจรกำลังไฟ</a>
+    <a class="pin" href="#main-pins"><span class="num">03</span> Pin — ESP32 หลัก</a>
+    <a class="pin" href="#cam-pins"><span class="num">04</span> Pin — ESP32-CAM</a>
+    <a class="pin" href="#wiring"><span class="num">05</span> วิธีต่อสายทั้งหมด</a>
+    <a class="pin" href="#safety"><span class="num">06</span> ความปลอดภัย</a>
+    <a class="pin" href="#checklist"><span class="num">07</span> เช็คลิสต์ก่อนจ่ายไฟ</a>
+  </div>
+</nav>
+
+<!-- 01 BOM -->
+<section id="bom">
+  <div class="sec-head"><span class="sec-num">01</span><h2>รายการฮาร์ดแวร์</h2></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>อุปกรณ์</th><th>จำนวน</th><th>หมายเหตุ</th></tr></thead>
+      <tbody>
+        <tr><td class="name">ESP32 DevKit V1 (38 pin)</td><td class="qty">1</td><td>สมองหลักของระบบ</td></tr>
+        <tr><td class="name">ESP32-CAM (OV2640)</td><td class="qty">2</td><td>ต้องมี FTDI/USB-TTL แยกสำหรับ flash โปรแกรม</td></tr>
+        <tr><td class="name">GM65 / GM66 Barcode Scanner</td><td class="qty">1</td><td>โหมด UART TTL</td></tr>
+        <tr><td class="name">Solenoid Lock 12V</td><td class="qty">1</td><td>แนะนำแบบ Fail-Secure</td></tr>
+        <tr><td class="name">Relay Module 5V 1-channel</td><td class="qty">3</td><td>Solenoid / UV-C / Siren แยกช่องกัน</td></tr>
+        <tr><td class="name">Magnetic Door Sensor (Reed)</td><td class="qty">1</td><td>—</td></tr>
+        <tr><td class="name">HC-SR04 Ultrasonic</td><td class="qty">1</td><td>ตรวจพัสดุในกล่อง</td></tr>
+        <tr><td class="name">MPU6050 (Accel+Gyro, I2C)</td><td class="qty">1</td><td>ตรวจยก/เอียง</td></tr>
+        <tr><td class="name">SW-420 Vibration Sensor</td><td class="qty">1</td><td>ตรวจการงัด/กระแทก</td></tr>
+        <tr><td class="name">Buzzer / ไซเรน 12V</td><td class="qty">1</td><td>ผ่าน relay ถ้าเป็นไซเรน 12V</td></tr>
+        <tr><td class="name">UV-C LED Module (275nm)</td><td class="qty">1–2</td><td>ต้องปิดมิดชิด ไม่รั่วออกนอกกล่อง</td></tr>
+        <tr><td class="name">Adapter 12V 3A</td><td class="qty">1</td><td>จ่าย Solenoid + UV + Siren</td></tr>
+        <tr><td class="name">Buck Converter 12V→5V (LM2596)</td><td class="qty">1–2</td><td>จ่าย ESP32 และโมดูลลอจิก</td></tr>
+        <tr><td class="name">OLED 0.96" I2C (SSD1306)</td><td class="qty">1</td><td>ตัวเลือก — แสดงสถานะ</td></tr>
+        <tr><td class="name">LED สถานะ (เขียว/แดง/เหลือง)</td><td class="qty">3</td><td>ตัวเลือก — ready/error/processing</td></tr>
+        <tr><td class="name">MicroSD Card Module</td><td class="qty">1</td><td>ตัวเลือก — log สำรอง</td></tr>
+        <tr><td class="name">Load Cell 5kg + HX711</td><td class="qty">1</td><td>ตัวเลือก — ยืนยันน้ำหนักพัสดุ</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 02 POWER -->
+<section id="power">
+  <div class="sec-head"><span class="sec-num">02</span><h2>วงจรกำลังไฟ (Power Architecture)</h2></div>
+  <div class="power-diagram">
+    <span class="p-source">⚡ Adapter 220VAC → 12VDC 3A</span>
+    <div class="branch"><span class="load">Solenoid Lock</span><span class="via">via Relay #1</span><span class="amp">~1–2A peak</span></div>
+    <div class="branch"><span class="load">UV-C LED Module</span><span class="via">via Relay #2</span><span class="amp">~0.3–0.5A</span></div>
+    <div class="branch"><span class="load">Siren / Buzzer 12V</span><span class="via">via Relay #3</span><span class="amp">~0.2A</span></div>
+    <div class="branch"><span class="load">Buck Converter 12V→5V 3A</span><span class="via"></span><span class="amp"></span></div>
+    <div class="sub-branch">
+      <div class="branch"><span class="load">ESP32 DevKit V1 (Main)</span><span class="via"></span><span class="amp">~0.3–0.5A (WiFi TX peak ~0.8A)</span></div>
+      <div class="branch"><span class="load">ESP32-CAM #1</span><span class="via"></span><span class="amp">peak ~0.8–1A ขณะถ่ายภาพ</span></div>
+      <div class="branch"><span class="load">ESP32-CAM #2</span><span class="via"></span><span class="amp">~0.3–0.5A</span></div>
+      <div class="branch"><span class="load">GM65 Barcode Scanner</span><span class="via"></span><span class="amp">~0.1A</span></div>
+      <div class="branch"><span class="load">HC-SR04 / MPU6050 / SW-420</span><span class="via"></span><span class="amp">~0.05A รวม</span></div>
+      <div class="branch"><span class="load">OLED / LED สถานะ</span><span class="via"></span><span class="amp">~0.05A</span></div>
+    </div>
+  </div>
+
+  <div class="callout danger">
+    <span class="tag">Brown-out</span>
+    <div>ESP32-CAM กิน current peak สูงมากช่วง WiFi TX + ถ่ายภาพ (ถึง ~1A) — ใช้ Buck Converter แยกจาก ESP32 หลัก หรืออย่างน้อยต้องมี <b>capacitor 470–1000 µF</b> คร่อมขา 5V/GND ของแต่ละบอร์ด ไม่เช่นนั้นบอร์ดจะรีสตาร์ทเอง</div>
+  </div>
+  <div class="callout warn">
+    <span class="tag">Power Domain</span>
+    <div>ห้ามจ่ายไฟ Solenoid / UV / Siren ผ่านขา 5V ของ ESP32 โดยตรง ต้องผ่าน Relay ที่แยก power domain เท่านั้น</div>
+  </div>
+  <div class="callout warn">
+    <span class="tag">Protection</span>
+    <div>ใส่ <b>ฟิวส์ 3A</b> ที่ทางเข้า 12V และ <b>ไดโอด Flyback</b> คร่อม Solenoid Lock เพื่อกันแรงดันย้อนกลับ (back-EMF) ทำลาย Relay/MCU</div>
+  </div>
+</section>
+
+<!-- 03 MAIN PINS -->
+<section id="main-pins">
+  <div class="sec-head"><span class="sec-num">03</span><h2>Pin Assignment — ESP32 หลัก</h2></div>
+  <p class="sec-desc">ใช้งานได้จริงราว 25 ขา หลีกเลี่ยง strapping pin (0, 2, 12, 15) และขา flash ภายใน (6–11)</p>
+  <div class="table-wrap">
+    <table class="pin-table">
+      <thead><tr><th>Function</th><th>GPIO</th><th>หมายเหตุ</th></tr></thead>
+      <tbody>
+        <tr><td class="func">Barcode RX (จาก GM65 TX)</td><td class="gpio">16 <span class="badge in">UART RX</span></td><td>HardwareSerial(2)</td></tr>
+        <tr><td class="func">Barcode TX (ไป GM65 RX)</td><td class="gpio">17 <span class="badge out">UART TX</span></td><td>ใช้เฉพาะถ้าต้องส่ง config command</td></tr>
+        <tr><td class="func">Solenoid Lock Relay</td><td class="gpio">25 <span class="badge out">OUT</span></td><td>ระวัง relay module มักเป็น Active-LOW</td></tr>
+        <tr><td class="func">UV-C Relay</td><td class="gpio">26 <span class="badge out">OUT</span></td><td>—</td></tr>
+        <tr><td class="func">Siren/Buzzer Relay</td><td class="gpio">27 <span class="badge out">OUT</span></td><td>—</td></tr>
+        <tr><td class="func">Magnetic Door Sensor</td><td class="gpio">34 <span class="badge in">IN + INT</span></td><td>Input-only, ต่อ pull-up 10kΩ ภายนอกเอง</td></tr>
+        <tr><td class="func">HC-SR04 Trigger</td><td class="gpio">5 <span class="badge out">OUT</span></td><td>—</td></tr>
+        <tr><td class="func">HC-SR04 Echo</td><td class="gpio">18 <span class="badge in">IN</span></td><td>ผ่าน voltage divider 5V→3.3V</td></tr>
+        <tr><td class="func">MPU6050 SDA</td><td class="gpio">21 <span class="badge i2c">I2C</span></td><td>—</td></tr>
+        <tr><td class="func">MPU6050 SCL</td><td class="gpio">22 <span class="badge i2c">I2C</span></td><td>—</td></tr>
+        <tr><td class="func">MPU6050 INT (ตัวเลือก)</td><td class="gpio">35 <span class="badge in">INT</span></td><td>ใช้ motion interrupt แทน polling</td></tr>
+        <tr><td class="func">SW-420 Vibration</td><td class="gpio">32 <span class="badge in">IN + INT</span></td><td>pull-down 10kΩ</td></tr>
+        <tr><td class="func">OLED SDA/SCL (ตัวเลือก)</td><td class="gpio">21 / 22 <span class="badge i2c">I2C</span></td><td>share bus กับ MPU6050 คนละ address</td></tr>
+        <tr><td class="func">Status LED เขียว</td><td class="gpio">13 <span class="badge out">OUT</span></td><td>Ready/Armed</td></tr>
+        <tr><td class="func">Status LED แดง</td><td class="gpio">14 <span class="badge out">OUT</span></td><td>Error/Alarm</td></tr>
+        <tr><td class="func">Status LED เหลือง</td><td class="gpio">33 <span class="badge out">OUT</span></td><td>Processing</td></tr>
+        <tr><td class="func">Trigger CAM#1 (Courier)</td><td class="gpio">19 <span class="badge out">OUT</span></td><td>Backup trigger ถ้า HTTP ล้มเหลว</td></tr>
+        <tr><td class="func">Trigger CAM#2 (Internal)</td><td class="gpio">23 <span class="badge out">OUT</span></td><td>Backup trigger</td></tr>
+        <tr><td class="func">MicroSD CS (ตัวเลือก)</td><td class="gpio">4 <span class="badge out">SPI</span></td><td>ถ้าใช้ SD module แยก</td></tr>
+        <tr><td class="func">Load Cell HX711 DT (ตัวเลือก)</td><td class="gpio">15 <span class="badge in">IN</span></td><td>strap pin — ปล่อยลอยตอน boot</td></tr>
+        <tr><td class="func">Load Cell HX711 SCK (ตัวเลือก)</td><td class="gpio">2 <span class="badge out">OUT</span></td><td>strap pin — ระวัง</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout info">
+    <span class="tag">Input-only</span>
+    <div>GPIO 34–39 เป็น input-only ต่อ actuator ไม่ได้ และไม่มี internal pull-up/pull-down — ต้องต่อ R ภายนอกเอง (แนะนำ 10kΩ)</div>
+  </div>
+</section>
+
+<!-- 04 CAM PINS -->
+<section id="cam-pins">
+  <div class="sec-head"><span class="sec-num">04</span><h2>Pin Assignment — ESP32-CAM</h2></div>
+  <p class="sec-desc">ขา GPIO ส่วนใหญ่ถูกใช้โดยกล้อง OV2640 เหลือใช้งานได้จริงไม่กี่ขา</p>
+  <div class="table-wrap">
+    <table class="pin-table">
+      <thead><tr><th>Function</th><th>GPIO</th><th>หมายเหตุ</th></tr></thead>
+      <tbody>
+        <tr><td class="func">Camera (OV2640)</td><td class="gpio">0,5,18,19,21,22,23,25,26,27,32,34,35,36,39</td><td>ใช้ภายในโดย library esp32-camera ห้ามใช้งานอื่น</td></tr>
+        <tr><td class="func">Flash LED (built-in)</td><td class="gpio">4</td><td>ไฟช่วยถ่ายภาพตอนกลางคืน</td></tr>
+        <tr><td class="func">Trigger Input (จาก Main)</td><td class="gpio">13 <span class="badge in">INT</span></td><td>ตั้งเป็น interrupt RISING</td></tr>
+        <tr><td class="func">Status LED (สีแดง บนบอร์ด)</td><td class="gpio">33</td><td>บอกสถานะถ่ายภาพสำเร็จ</td></tr>
+        <tr><td class="func">MicroSD built-in (ตัวเลือก)</td><td class="gpio">2,4,12,13,14,15</td><td>ชนกับ flash(4) และ trigger(13) — ออกแบบร่วมกันดีๆ</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout info">
+    <span class="tag">ข้อจำกัด</span>
+    <div>ขาว่างใช้สะดวกจริงมีแค่ GPIO 12, 13, 14, 15, 16 — แนะนำสื่อสารผ่าน WiFi/HTTP เป็นหลัก ลดพึ่งพา GPIO เหลือแค่ trigger สำรอง</div>
+  </div>
+</section>
+
+<!-- 05 WIRING -->
+<section id="wiring">
+  <div class="sec-head"><span class="sec-num">05</span><h2>วิธีต่อสายทั้งหมด</h2></div>
+
+  <div class="wire-board">
+    <h3>Barcode Scanner (GM65)</h3>
+    <div class="wire-row"><div class="from">ESP32 GPIO16 (RX2)</div><div class="wire-line"><span class="note">UART</span></div><div class="to">GM65 TXD</div></div>
+    <div class="wire-row"><div class="from">ESP32 GPIO17 (TX2)</div><div class="wire-line"><span class="note">UART</span></div><div class="to">GM65 RXD</div></div>
+    <div class="wire-row"><div class="from">ESP32 5V / GND</div><div class="wire-line"></div><div class="to">GM65 VCC / GND</div></div>
+
+    <div class="group-label">Actuators — ผ่าน Relay</div>
+    <div class="wire-row"><div class="from">ESP32 GPIO25</div><div class="wire-line"><span class="note">Relay #1 IN</span></div><div class="to">COM/NO → Solenoid (+) → 12V<br><span style="font-size:11px;color:var(--silk-dim)">+flyback diode คร่อมขดลวด</span></div></div>
+    <div class="wire-row"><div class="from">ESP32 GPIO26</div><div class="wire-line"><span class="note">Relay #2 IN</span></div><div class="to">COM/NO → UV-C Module (+)</div></div>
+    <div class="wire-row"><div class="from">ESP32 GPIO27</div><div class="wire-line"><span class="note">Relay #3 IN</span></div><div class="to">COM/NO → Siren (+) → 12V</div></div>
+
+    <div class="group-label">Sensors</div>
+    <div class="wire-row"><div class="from">ESP32 GPIO34</div><div class="wire-line"><span class="note">+ pull-up 10kΩ→3.3V</span></div><div class="to">Magnetic Door Sensor</div></div>
+    <div class="wire-row"><div class="from">ESP32 GPIO5</div><div class="wire-line"><span class="note">TRIG</span></div><div class="to">HC-SR04</div></div>
+    <div class="wire-row"><div class="from">ESP32 GPIO18</div><div class="wire-line"><span class="note">ECHO via divider 1k/2kΩ</span></div><div class="to">HC-SR04 (5V→3.3V)</div></div>
+    <div class="wire-row"><div class="from">ESP32 5V / GND</div><div class="wire-line"></div><div class="to">HC-SR04 VCC / GND</div></div>
+    <div class="wire-row"><div class="from">ESP32 GPIO21 (SDA)</div><div class="wire-line"><span class="note">I2C + pull-up 4.7kΩ</span></div><div class="to">MPU6050 SDA</div></div>
+    <div class="wire-row"><div class="from">ESP32 GPIO22 (SCL)</div><div class="wire-line"><span class="note">I2C</span></div><div class="to">MPU6050 SCL</div></div>
+    <div class="wire-row"><div class="from">ESP32 3.3V / GND</div><div class="wire-line"></div><div class="to">MPU6050 VCC / GND</div></div>
+    <div class="wire-row"><div class="from">ESP32 GPIO32</div><div class="wire-line"><span class="note">+ pull-down 10kΩ</span></div><div class="to">SW-420 DO</div></div>
+
+    <div class="group-label">Status LEDs</div>
+    <div class="wire-row"><div class="from">GPIO13 / 14 / 33</div><div class="wire-line"><span class="note">R 220–330Ω ต่อดวง</span></div><div class="to">LED เขียว / แดง / เหลือง</div></div>
+
+    <div class="group-label">Inter-board Trigger Lines → ESP32-CAM</div>
+    <div class="wire-row"><div class="from">ESP32 GPIO19</div><div class="wire-line"><span class="note">trigger pulse</span></div><div class="to">CAM #1 GPIO13</div></div>
+    <div class="wire-row"><div class="from">ESP32 GPIO23</div><div class="wire-line"><span class="note">trigger pulse</span></div><div class="to">CAM #2 GPIO13</div></div>
+    <div class="wire-row"><div class="from">GND ทุกบอร์ด</div><div class="wire-line"><span class="note">Common Ground</span></div><div class="to">เชื่อมถึงกันทั้งหมด</div></div>
+  </div>
+</section>
+
+<!-- 06 SAFETY -->
+<section id="safety">
+  <div class="sec-head"><span class="sec-num">06</span><h2>ความปลอดภัยด้านไฟฟ้า</h2></div>
+  <div class="callout info"><span class="tag">Ground</span><div>แยก ground plane ระหว่างวงจร 12V (Solenoid/UV/Siren) กับวงจรลอจิก 3.3V/5V แล้วเชื่อมกันที่ <b>จุดเดียว</b> (single point ground) เพื่อลด noise</div></div>
+  <div class="callout info"><span class="tag">Isolation</span><div>ใช้ relay module ที่มี opto-isolator ในตัว เพื่อกันไฟกระชากย้อนเข้า ESP32</div></div>
+  <div class="callout danger"><span class="tag">UV-C</span><div>UV-C 275nm อันตรายต่อดวงตา/ผิวหนัง ต้องมี <b>hardware interlock แบบ fail-safe</b> ไม่พึ่ง software อย่างเดียว — ต่อ magnetic door sensor แบบอนุกรม (in-series) กับสายไฟเลี้ยงของ UV relay จริงๆ เพื่อว่าแม้ software ค้าง UV ก็ติดไม่ได้เมื่อประตูเปิด</div></div>
+  <div class="callout warn"><span class="tag">Enclosure</span><div>UV-C module ต้องอยู่ในช่องแยกที่ไม่มีแสงรั่วออกสู่ภายนอกหรือช่องที่คนสัมผัสได้</div></div>
+  <div class="callout warn"><span class="tag">Fuse</span><div>ใส่ fuse/PTC ที่ทุกสาย 12V เพื่อป้องกันไฟฟ้าลัดวงจร</div></div>
+</section>
+
+<!-- 07 CHECKLIST -->
+<section id="checklist">
+  <div class="sec-head"><span class="sec-num">07</span><h2>เช็คลิสต์ก่อนจ่ายไฟครั้งแรก</h2></div>
+  <ul class="checklist">
+    <li><span class="n">1</span><div><b>วัด relay logic ก่อน</b> — เช็คว่าโมดูลเป็น active-HIGH หรือ active-LOW ด้วยมัลติมิเตอร์ก่อนต่อเข้า GPIO จริง</div></li>
+    <li><span class="n">2</span><div><b>ต่อ flyback diode</b> คร่อม solenoid ก่อนจ่ายไฟ 12V เข้า relay #1 เสมอ</div></li>
+    <li><span class="n">3</span><div><b>เช็ค common ground</b> ทุกบอร์ด (ESP32 หลัก + CAM 2 ตัว + relay module) ต้องเชื่อมถึงกัน</div></li>
+    <li><span class="n">4</span><div><b>แยก buck converter</b> สำหรับ ESP32-CAM หรือใส่ capacitor 470–1000µF คร่อม 5V/GND ก่อน flash โปรแกรม</div></li>
+    <li><span class="n">5</span><div><b>ทดสอบ voltage divider</b> ของ HC-SR04 Echo ด้วยมัลติมิเตอร์ว่าลดจาก 5V เหลือ ~3.3V จริง ก่อนต่อเข้า GPIO18</div></li>
+    <li><span class="n">6</span><div><b>ยืนยัน hardware interlock ของ UV-C</b> — ลองเปิดประตูตอน UV relay ทำงานอยู่ ไฟต้องดับทันทีแม้ software ค้าง</div></li>
+    <li><span class="n">7</span><div><b>ใส่ fuse 3A</b> ที่ทางเข้า 12V ก่อนเสียบปลั๊ก adapter ครั้งแรก</div></li>
+  </ul>
+</section>
+
+<footer>
+  SecureDrop — Smart Anti-Theft Parcel Box · อ้างอิงจาก docs/02_Hardware_and_Wiring.md · shxp3/securedrop
+</footer>
+
+</body>
+</html>
