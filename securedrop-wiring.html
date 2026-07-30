@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SecureDrop v1 — Wiring Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a1f17;
+    --bg-2: #0d2921;
+    --panel: #123328;
+    --panel-2: #163d30;
+    --line: #245240;
+    --line-soft: #1c3e30;
+    --silk: #eef0e6;
+    --silk-dim: #a9baaf;
+    --copper: #d3a25a;
+    --copper-bright: #f0c37e;
+    --trace: #48e0a0;
+    --trace-dim: #2f8f6c;
+    --danger: #e2543d;
+    --danger-bg: #351d18;
+    --warn: #e3b23c;
+    --blue: #5aa9d6;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:
+      radial-gradient(circle at 1px 1px, rgba(72,224,160,0.055) 1px, transparent 0) 0 0/22px 22px,
+      linear-gradient(180deg, var(--bg), var(--bg-2) 60%, var(--bg));
+    color: var(--silk);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    line-height: 1.6;
+    padding-bottom: 80px;
+  }
+  h1,h2,h3{ font-family: 'Space Grotesk', sans-serif; }
+  a{color: var(--copper-bright);}
+
+  header{ max-width: 1040px; margin: 0 auto; padding: 56px 24px 32px; }
+  .plate{
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: linear-gradient(160deg, var(--panel), var(--panel-2));
+    padding: 32px 32px 26px;
+    position: relative; overflow: hidden;
+  }
+  .plate::before{
+    content:""; position:absolute; inset:0;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 38px, rgba(211,162,90,0.05) 38px 39px),
+      repeating-linear-gradient(0deg, transparent 0 38px, rgba(211,162,90,0.05) 38px 39px);
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-size: 12px; letter-spacing: 0.18em; color: var(--trace);
+    text-transform: uppercase; margin-bottom: 10px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--trace); box-shadow:0 0 8px var(--trace);}
+  h1{ font-size: clamp(30px, 5vw, 46px); font-weight: 700; letter-spacing: -0.01em; margin-bottom: 10px; }
+  h1 span{color: var(--copper-bright);}
+  .subtitle{ color: var(--silk-dim); font-size: 15px; max-width: 680px; margin-bottom: 22px; }
+  .meta-row{
+    display:flex; flex-wrap:wrap; gap: 10px 28px;
+    font-size: 12.5px; color: var(--silk-dim);
+    border-top: 1px dashed var(--line); padding-top: 16px;
+  }
+  .meta-row b{color: var(--copper);}
+
+  nav{ max-width: 1040px; margin: 0 auto; padding: 0 24px 40px; }
+  .pinheader{
+    display:flex; flex-wrap:wrap; gap:8px;
+    border: 1px solid var(--line-soft);
+    background: rgba(18,51,40,0.5);
+    border-radius: var(--radius); padding: 14px;
+  }
+  .pin{
+    display:flex; align-items:center; gap:8px;
+    padding: 6px 12px; border: 1px solid var(--line); border-radius: 2px;
+    font-size: 12.5px; color: var(--silk-dim); text-decoration:none; background: var(--panel);
+  }
+  .pin:hover{ border-color: var(--trace); color: var(--silk); background: var(--panel-2);}
+  .pin .num{color: var(--copper); font-weight:600;}
+
+  section{ max-width: 1040px; margin: 0 auto; padding: 0 24px 56px; }
+  .sec-head{
+    display:flex; align-items:baseline; gap:14px; margin-bottom: 18px;
+    border-bottom: 1px solid var(--line); padding-bottom: 12px;
+  }
+  .sec-num{
+    color: var(--copper); font-size: 13px; border: 1px solid var(--copper);
+    padding: 2px 8px; border-radius: 2px; flex-shrink:0;
+  }
+  .sec-head h2{ font-size: 22px; font-weight:600; }
+  .sec-desc{color:var(--silk-dim); font-size:13.5px; margin: -8px 0 20px;}
+
+  .table-wrap{ border:1px solid var(--line-soft); border-radius: var(--radius); overflow:hidden; }
+  table{ width:100%; border-collapse: collapse; font-size: 13.5px;}
+  thead th{
+    text-align:left; background: var(--panel-2); color: var(--copper-bright);
+    padding: 10px 14px; font-weight:600; font-size:12px; letter-spacing:.04em;
+    text-transform:uppercase; border-bottom:1px solid var(--line);
+  }
+  tbody td{ padding: 10px 14px; border-bottom:1px solid var(--line-soft); color: var(--silk-dim); vertical-align: top; }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background: rgba(72,224,160,0.045);}
+  td.qty{color: var(--trace); font-weight:600; text-align:center; width:60px;}
+  td.name{color: var(--silk); font-weight:500;}
+  code{
+    font-family:'IBM Plex Mono'; background: rgba(211,162,90,0.12); color: var(--copper-bright);
+    padding: 1px 6px; border-radius: 2px; font-size:.92em;
+  }
+
+  .power-diagram{
+    border:1px solid var(--line-soft); border-radius: var(--radius);
+    background: var(--panel); padding: 22px; font-size: 13px; overflow-x:auto;
+  }
+  .p-source{
+    display:inline-block; border:1px solid var(--warn); color:var(--warn);
+    padding:6px 14px; border-radius:2px; font-weight:600; margin-bottom:18px;
+  }
+  .branch{
+    display:flex; align-items:center; gap:14px; margin: 10px 0; padding-left: 18px;
+    border-left: 2px solid var(--trace-dim); position:relative;
+  }
+  .branch::before{
+    content:""; position:absolute; left:-2px; top:50%; width:16px; height:2px; background:var(--trace-dim);
+  }
+  .branch .load{ color: var(--silk); font-weight:600; min-width:190px; }
+  .branch .via{ color: var(--copper); font-size:12px;}
+  .branch .amp{ color: var(--silk-dim); font-size:12px; margin-left:auto;}
+  .sub-branch{ margin-left: 34px; border-left: 1px dashed var(--line); padding-left: 18px; margin-top: 6px; }
+  .sub-branch .branch{border-left:1px solid var(--line);}
+  .sub-branch .branch::before{background:var(--line);}
+
+  .callout{
+    border-radius: var(--radius); padding: 14px 16px; margin: 14px 0;
+    font-size: 13.5px; border: 1px solid; display:flex; gap:12px;
+  }
+  .callout .tag{
+    font-family:'Space Grotesk'; font-weight:700; font-size:11px; letter-spacing:.06em;
+    padding: 2px 8px; border-radius:2px; height:fit-content; white-space:nowrap;
+  }
+  .callout.danger{ background: var(--danger-bg); border-color: rgba(226,84,61,0.5); color:#f0b3a6;}
+  .callout.danger .tag{ background: var(--danger); color:#1a0e0c;}
+  .callout.warn{ background: rgba(227,178,60,0.08); border-color: rgba(227,178,60,0.4); color:#e6cf9b;}
+  .callout.warn .tag{ background: var(--warn); color:#241a05;}
+  .callout.info{ background: rgba(90,169,214,0.08); border-color: rgba(90,169,214,0.4); color:#b7d7ea;}
+  .callout.info .tag{ background: var(--blue); color:#071822;}
+
+  .pin-table td.gpio{ color: var(--copper-bright); font-weight:600; white-space:nowrap;}
+  .pin-table td.func{ color:var(--silk);}
+  .badge{
+    display:inline-block; font-size:10.5px; padding:2px 6px; border-radius:2px;
+    border:1px solid var(--trace-dim); color: var(--trace); margin-left:6px; vertical-align:middle;
+  }
+  .badge.in{border-color:var(--blue); color:var(--blue);}
+  .badge.out{border-color:var(--copper); color:var(--copper);}
+
+  .wire-board{
+    border: 1px solid var(--line-soft); border-radius: var(--radius);
+    background: var(--panel); padding: 26px;
+  }
+  .wire-board h3{
+    font-size:14px; color:var(--copper-bright); margin-bottom:16px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .wire-board h3::before{content:"◆"; color:var(--trace); font-size:10px;}
+  .wire-row{
+    display:grid; grid-template-columns: 170px 1fr 200px;
+    align-items:center; gap: 10px; padding: 10px 0;
+    border-bottom: 1px dashed var(--line-soft); font-size: 13px;
+  }
+  .wire-row:last-child{border-bottom:none;}
+  .wire-row .from, .wire-row .to{
+    padding: 6px 10px; border-radius:2px; text-align:center; font-weight:600;
+    border: 1px solid var(--line);
+  }
+  .wire-row .from{ color:var(--copper-bright); background: rgba(211,162,90,0.08);}
+  .wire-row .to{ color:var(--silk); background: rgba(238,240,230,0.04);}
+  .wire-line{
+    height:2px; background: repeating-linear-gradient(90deg, var(--trace) 0 6px, transparent 6px 10px);
+    position:relative;
+  }
+  .wire-line .note{
+    position:absolute; top:-19px; left:50%; transform:translateX(-50%);
+    font-size:11px; color:var(--silk-dim); white-space:nowrap; background:var(--panel); padding:0 6px;
+  }
+  .group-label{
+    font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--trace);
+    margin: 22px 0 4px; padding-top:14px; border-top:1px solid var(--line-soft);
+  }
+  .group-label:first-of-type{border-top:none; margin-top:0; padding-top:0;}
+
+  .checklist{ list-style:none; display:grid; gap:10px;}
+  .checklist li{
+    display:flex; gap:12px; align-items:flex-start;
+    padding: 12px 14px; border:1px solid var(--line-soft); border-radius:var(--radius);
+    background: var(--panel); font-size:13.5px; color:var(--silk-dim);
+  }
+  .checklist li b{color:var(--silk);}
+  .checklist .n{
+    font-family:'Space Grotesk'; font-weight:700; color:var(--copper);
+    border:1px solid var(--copper); border-radius:50%; width:22px; height:22px;
+    display:flex; align-items:center; justify-content:center; font-size:11.5px; flex-shrink:0;
+  }
+
+  .flow{
+    border:1px solid var(--line-soft); border-radius:var(--radius);
+    background:var(--panel); padding:18px 20px; font-size:13px; color:var(--silk-dim);
+  }
+  .flow b{color:var(--silk);}
+
+  footer{
+    max-width:1040px; margin: 40px auto 0; padding: 20px 24px; text-align:center;
+    color: var(--silk-dim); font-size:12px; border-top:1px dashed var(--line-soft);
+  }
+
+  @media (max-width: 680px){
+    .wire-row{grid-template-columns: 1fr; text-align:center;}
+    .wire-line{height:20px; width:2px; margin:0 auto; background:repeating-linear-gradient(0deg, var(--trace) 0 6px, transparent 6px 10px);}
+    .wire-line .note{position:static; transform:none; display:block; margin:4px 0;}
+    .branch{flex-wrap:wrap;}
+    .branch .amp{margin-left:0;}
+  }
+  ::selection{ background: var(--trace); color:#04140d;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="plate">
+    <div class="eyebrow"><span class="dot"></span>Hardware Reference · SecureDrop v1 MVP</div>
+    <h1>SecureDrop <span>Wiring Guide</span></h1>
+    <p class="subtitle">
+      คู่มือต่อสายสำหรับเวอร์ชันแรก (แข่งขัน STEAM) —
+      มีแค่ Main ESP32, ESP32-CAM 1 ตัว, Barcode Scanner, Relay + Solenoid
+      <b>ไม่มี</b> UV / Ultrasonic / MPU / Vibration / Reed / กล้องตัวที่ 2
+    </p>
+    <div class="meta-row">
+      <div>ควบคุมหลัก&nbsp;<b>ESP32 DevKit V1</b></div>
+      <div>กล้อง&nbsp;<b>ESP32-CAM ×1</b></div>
+      <div>ล็อก&nbsp;<b>12V Fail-Secure + Relay 1ch</b></div>
+      <div>แหล่งจ่าย&nbsp;<b>12V + LM2596 → 5V</b></div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="pinheader">
+    <a class="pin" href="#bom"><span class="num">01</span> รายการอุปกรณ์</a>
+    <a class="pin" href="#power"><span class="num">02</span> วงจรกำลังไฟ</a>
+    <a class="pin" href="#main-pins"><span class="num">03</span> Pin — ESP32 หลัก</a>
+    <a class="pin" href="#cam"><span class="num">04</span> ESP32-CAM</a>
+    <a class="pin" href="#wiring"><span class="num">05</span> วิธีต่อสาย</a>
+    <a class="pin" href="#flow"><span class="num">06</span> Flow ระบบ</a>
+    <a class="pin" href="#checklist"><span class="num">07</span> เช็คลิสต์</a>
+  </div>
+</nav>
+
+<section id="bom">
+  <div class="sec-head"><span class="sec-num">01</span><h2>รายการฮาร์ดแวร์ (v1 เท่านั้น)</h2></div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>อุปกรณ์</th><th>จำนวน</th><th>หมายเหตุ</th></tr></thead>
+      <tbody>
+        <tr><td class="name">ESP32 DevKit V1 (WROOM-32, 38 pin)</td><td class="qty">1</td><td>Main Controller</td></tr>
+        <tr><td class="name">ESP32-CAM AI-Thinker (OV2640)</td><td class="qty">1</td><td>ติดด้านหน้ากล่อง — ถ่ายหน้าคนส่ง</td></tr>
+        <tr><td class="name">FTDI / USB-TTL 3.3V</td><td class="qty">1</td><td>ใช้ตอน flash โปรแกรม CAM เท่านั้น</td></tr>
+        <tr><td class="name">GM65-compatible Barcode Scanner</td><td class="qty">1</td><td>โหมด UART TTL, 9600 baud, auto-scan</td></tr>
+        <tr><td class="name">Solenoid Lock 12V Fail-Secure</td><td class="qty">1</td><td>ไม่มีไฟ = ล็อกอยู่</td></tr>
+        <tr><td class="name">Relay Module 5V 1-channel (Active-LOW)</td><td class="qty">1</td><td>ขับ solenoid</td></tr>
+        <tr><td class="name">Adapter 12V (แนะนำ 2–3A)</td><td class="qty">1</td><td>จ่าย solenoid</td></tr>
+        <tr><td class="name">Buck LM2596 12V→5V</td><td class="qty">1</td><td>จ่าย ESP32 Main + CAM + scanner + relay</td></tr>
+        <tr><td class="name">Flyback diode (เช่น 1N4007)</td><td class="qty">1</td><td>คร่อมขดลวด solenoid</td></tr>
+        <tr><td class="name">Capacitor 470–1000µF</td><td class="qty">1–2</td><td>คร่อม 5V/GND ของ CAM (กัน brown-out)</td></tr>
+        <tr><td class="name">สายจัมเปอร์ / perfboard</td><td class="qty">1 ชุด</td><td>ประกอบต้นแบบ</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout info">
+    <span class="tag">v1 scope</span>
+    <div>อย่าต่อ UV / HC-SR04 / MPU6050 / SW-420 / Reed / ไซเรน / OLED ในเวอร์ชันนี้ — ยังไม่มีใน firmware</div>
+  </div>
+</section>
+
+<section id="power">
+  <div class="sec-head"><span class="sec-num">02</span><h2>วงจรกำลังไฟ</h2></div>
+  <div class="power-diagram">
+    <span class="p-source">Adapter 220VAC → 12VDC</span>
+    <div class="branch"><span class="load">Solenoid Lock</span><span class="via">via Relay COM/NO</span><span class="amp">~1–2A peak</span></div>
+    <div class="branch"><span class="load">LM2596 Buck 12V→5V</span><span class="via"></span><span class="amp"></span></div>
+    <div class="sub-branch">
+      <div class="branch"><span class="load">ESP32 Main (5V / VIN)</span><span class="via"></span><span class="amp">~0.3–0.8A</span></div>
+      <div class="branch"><span class="load">ESP32-CAM 5V</span><span class="via"></span><span class="amp">peak ~0.8–1A</span></div>
+      <div class="branch"><span class="load">GM65 Scanner 5V</span><span class="via"></span><span class="amp">~0.1A</span></div>
+      <div class="branch"><span class="load">Relay Module VCC 5V</span><span class="via"></span><span class="amp">coil ~0.05–0.1A</span></div>
+    </div>
+  </div>
+  <div class="callout danger">
+    <span class="tag">สำคัญ</span>
+    <div>ห้ามจ่ายไฟ solenoid จากขา 5V ของ ESP32 — ต้องใช้ 12V ผ่าน relay เท่านั้น และต่อ <b>GND รวม</b> ทุกบอร์ด</div>
+  </div>
+  <div class="callout warn">
+    <span class="tag">Brown-out</span>
+    <div>ใส่ capacitor 470–1000µF ที่ 5V/GND ของ ESP32-CAM — ช่วงถ่ายภาพ+WiFi มักรีบูตถ้าไฟไม่พอ</div>
+  </div>
+</section>
+
+<section id="main-pins">
+  <div class="sec-head"><span class="sec-num">03</span><h2>Pin Assignment — ESP32 หลัก (v1)</h2></div>
+  <p class="sec-desc">ตรงกับ <code>firmware/main_controller/include/pins.h</code></p>
+  <div class="table-wrap">
+    <table class="pin-table">
+      <thead><tr><th>Function</th><th>GPIO</th><th>หมายเหตุ</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="func">Barcode RX (จาก Scanner TX)</td>
+          <td class="gpio">16 <span class="badge in">UART2 RX</span></td>
+          <td>9600 baud — ต่อแค่ขา RX (ไม่ต่อ TX)</td>
+        </tr>
+        <tr>
+          <td class="func">Relay IN (Solenoid)</td>
+          <td class="gpio">25 <span class="badge out">OUT</span></td>
+          <td>Active-LOW: GPIO=LOW → ปลดล็อก</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="cam">
+  <div class="sec-head"><span class="sec-num">04</span><h2>ESP32-CAM (หน้ากล่อง)</h2></div>
+  <p class="sec-desc">ไม่มีสาย trigger จาก Main — สั่งถ่ายผ่าน WiFi เท่านั้น</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>รายการ</th><th>ค่า</th></tr></thead>
+      <tbody>
+        <tr><td class="name">ตำแหน่ง</td><td>ด้านหน้า เหนือ barcode scanner</td></tr>
+        <tr><td class="name">ไฟเลี้ยง</td><td>5V จาก LM2596 + GND รวม</td></tr>
+        <tr><td class="name">Static IP</td><td><code>192.168.1.101</code></td></tr>
+        <tr><td class="name">Capture URL</td><td><code>http://192.168.1.101/capture</code></td></tr>
+        <tr><td class="name">Flash LED</td><td>GPIO4 ในตัวบอร์ด (firmware เปิดเองตอนถ่าย)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout info">
+    <span class="tag">Flash CAM</span>
+    <div>ตอนอัปโหลดโปรแกรม: ต่อ FTDI 3.3V, IO0→GND, กด RESET → Upload → ถอด IO0 ออกจาก GND แล้วกด RESET อีกครั้ง</div>
+  </div>
+</section>
+
+<section id="wiring">
+  <div class="sec-head"><span class="sec-num">05</span><h2>วิธีต่อสายทั้งหมด (v1)</h2></div>
+
+  <div class="wire-board">
+    <h3>1) กำลังไฟ</h3>
+    <div class="wire-row"><div class="from">Adapter 12V (+)</div><div class="wire-line"><span class="note">12V rail</span></div><div class="to">Relay COM + LM2596 IN+</div></div>
+    <div class="wire-row"><div class="from">Adapter 12V (−)</div><div class="wire-line"><span class="note">GND</span></div><div class="to">GND รวมทุกจุด</div></div>
+    <div class="wire-row"><div class="from">LM2596 OUT 5V</div><div class="wire-line"></div><div class="to">ESP32 5V/VIN + CAM 5V + Scanner VCC + Relay VCC</div></div>
+    <div class="wire-row"><div class="from">LM2596 GND</div><div class="wire-line"></div><div class="to">GND รวม</div></div>
+
+    <div class="group-label">2) Barcode Scanner (UART RX-only)</div>
+    <div class="wire-row"><div class="from">ESP32 GPIO16</div><div class="wire-line"><span class="note">UART RX</span></div><div class="to">Scanner TXD</div></div>
+    <div class="wire-row"><div class="from">ESP32 5V</div><div class="wire-line"></div><div class="to">Scanner VCC</div></div>
+    <div class="wire-row"><div class="from">ESP32 GND</div><div class="wire-line"></div><div class="to">Scanner GND</div></div>
+    <div class="wire-row"><div class="from">— ไม่ต่อ —</div><div class="wire-line"><span class="note">RX-only</span></div><div class="to">Scanner RXD (ปล่อยว่าง)</div></div>
+
+    <div class="group-label">3) Relay + Solenoid (Fail-Secure)</div>
+    <div class="wire-row"><div class="from">ESP32 GPIO25</div><div class="wire-line"><span class="note">Relay IN</span></div><div class="to">Relay IN</div></div>
+    <div class="wire-row"><div class="from">ESP32 5V / GND</div><div class="wire-line"></div><div class="to">Relay VCC / GND</div></div>
+    <div class="wire-row"><div class="from">Relay COM</div><div class="wire-line"><span class="note">12V+</span></div><div class="to">Adapter 12V (+)</div></div>
+    <div class="wire-row"><div class="from">Relay NO</div><div class="wire-line"><span class="note">ไปขดลวด</span></div><div class="to">Solenoid (+)</div></div>
+    <div class="wire-row"><div class="from">Solenoid (−)</div><div class="wire-line"></div><div class="to">Adapter 12V GND</div></div>
+    <div class="wire-row"><div class="from">1N4007</div><div class="wire-line"><span class="note">ขนานขดลวด</span></div><div class="to">แคโทดที่ Solenoid (+) / แอโนดที่ (−)</div></div>
+
+    <div class="group-label">4) ESP32-CAM</div>
+    <div class="wire-row"><div class="from">LM2596 5V</div><div class="wire-line"></div><div class="to">CAM 5V</div></div>
+    <div class="wire-row"><div class="from">GND รวม</div><div class="wire-line"></div><div class="to">CAM GND</div></div>
+    <div class="wire-row"><div class="from">470–1000µF</div><div class="wire-line"><span class="note">ใกล้บอร์ด CAM</span></div><div class="to">คร่อม CAM 5V ↔ GND</div></div>
+  </div>
+
+  <div class="callout warn">
+    <span class="tag">Active-LOW</span>
+    <div>Relay ส่วนใหญ่ Active-LOW: ตอนบูต firmware จะตั้ง GPIO25 เป็น HIGH = ล็อกอยู่ ถ้าโมดูลคุณเป็น Active-HIGH ให้แก้ <code>RELAY_ACTIVE_LOW</code> ใน <code>pins.h</code></div>
+  </div>
+</section>
+
+<section id="flow">
+  <div class="sec-head"><span class="sec-num">06</span><h2>ลำดับทำงานหลังต่อสายครบ</h2></div>
+  <div class="flow">
+    <b>1.</b> เปิดไฟ → Main ล็อกค้างไว้ → เชื่อม WiFi → พร้อมสแกน<br>
+    <b>2.</b> สแกนบาร์โค้ดที่ลงทะเบียน (เช่น <code>TH1234567890</code>)<br>
+    <b>3.</b> ปลดล็อก 5 วินาที → เรียก <code>http://192.168.1.101/capture</code><br>
+    <b>4.</b> ส่ง Telegram (เลขพัสดุ + เวลา + รูป) → ล็อกกลับ<br>
+    <b>5.</b> ถ้าบาร์โค้ดผิด / ใช้แล้ว → ไม่ปลดล็อก + ส่งแจ้งเตือน Telegram
+  </div>
+</section>
+
+<section id="checklist">
+  <div class="sec-head"><span class="sec-num">07</span><h2>เช็คลิสต์ก่อนจ่ายไฟครั้งแรก</h2></div>
+  <ul class="checklist">
+    <li><span class="n">1</span><div><b>ตั้ง LM2596 ให้ได้ ~5.0V</b> ด้วยมัลติมิเตอร์ ก่อนต่อเข้าบอร์ด</div></li>
+    <li><span class="n">2</span><div><b>ต่อ flyback diode</b> คร่อม solenoid ก่อนเสียบ 12V</div></li>
+    <li><span class="n">3</span><div><b>Common GND</b> — Adapter / Buck / ESP32 / CAM / Relay / Scanner ต้องร่วมกราวด์</div></li>
+    <li><span class="n">4</span><div><b>Scanner TX → GPIO16 เท่านั้น</b> อย่าสลับ TX/RX</div></li>
+    <li><span class="n">5</span><div><b>Flash CAM ก่อน</b> แล้วเปิดเบราว์เซอร์ทดสอบ <code>/capture</code> ให้ได้รูป</div></li>
+    <li><span class="n">6</span><div><b>Flash Main</b> ใส่ WiFi + Telegram token + chat id ใน <code>credentials.h</code></div></li>
+    <li><span class="n">7</span><div><b>CAM กับ Main ต้องอยู่ WiFi เดียวกัน</b> และ gateway ตรงกับที่ตั้งใน credentials</div></li>
+  </ul>
+</section>
+
+<footer>
+  SecureDrop v1 MVP — Smart Parcel Box · อัปเดตจาก wiring เดิมให้ตรงฮาร์ดแวร์เวอร์ชันแข่งขัน
+</footer>
+
+</body>
+</html>
