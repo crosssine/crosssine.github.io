@@ -1,0 +1,6 @@
+{
+  "version": "26.0.2",
+  "download": "https://crosssine.github.io/file/CrossSine-26.0.2.jar",
+  "changelog": "Make BlockIn faster\nImprove Rotation BedDefender\nFix Scaffold Switch Block flagging",
+  "page": "https://crosssine.github.io/downloads.html"
+}
